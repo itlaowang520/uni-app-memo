@@ -5,7 +5,7 @@
     
     <view class="memo-content">
       <!-- 备忘录列表 -->
-      <view class="memo-grid">
+      <view class="memo-grid" v-if="memoStore.memoList.length > 0">
         <view 
           class="memo-item" 
           v-for="item in memoStore.memoList" 
@@ -17,6 +17,10 @@
           <text class="memo-title">{{ item.title }}</text>
           <text class="memo-desc">{{ item.content }}</text>
         </view>
+      </view>
+
+      <view class="memo-grid" :class="memoStore.memoList.length === 0 ? 'memo-grid-empty' : ''" v-if="memoStore.memoList.length === 0">
+        <text class="memo-title">暂无数据</text>
       </view>
 
       <!-- 添加按钮 -->
@@ -100,6 +104,13 @@ const handleMemoClick = (item: any) => {
   transform: scale(0.97);
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
   background: rgba(255, 255, 255, 0.95);
+}
+
+.memo-grid-empty {
+  height: 240rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .memo-title {

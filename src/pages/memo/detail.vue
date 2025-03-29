@@ -54,6 +54,7 @@
 import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { useMemoStore } from '@/store'
+import { delay } from '@/utils';
 
 const memoStore = useMemoStore()
 
@@ -85,11 +86,13 @@ onLoad((options: any) => {
 
 // 返回上一页
 const handleBack = () => {
-  uni.navigateBack()
+  uni.navigateTo({
+    url: '/'
+  })
 }
 
 // 保存备忘录
-const handleSave = () => {
+const handleSave = async () => {
   if (!title.value.trim()) {
     uni.showToast({
       title: '请输入标题',
@@ -126,9 +129,7 @@ const handleSave = () => {
     icon: 'success'
   })
   
-  setTimeout(() => {
-    uni.navigateBack()
-  }, 1500)
+  await delay(1000, handleBack)
 }
 
 // 删除备忘录
