@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>移动端登录页面设计</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .design-container {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+        }
+
+        .mobile-preview {
+            width: 375px;
+            height: 812px;
+            background: white;
+            border-radius: 40px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .design-specs {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .login-form {
+            padding: 40px 20px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo img {
+            width: 80px;
+            height: 80px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #4A90E2;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74,144,226,0.2);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .login-btn:hover {
+            background: #357ABD;
+        }
+
+        .design-specs h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .spec-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .spec-item h3 {
+            color: #4A90E2;
+            margin-bottom: 5px;
+        }
+
+        .spec-item p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="design-container">
+        <div class="mobile-preview">
+            <div class="login-form">
+                <div class="logo">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%234A90E2'/%3E%3Ctext x='50' y='50' font-size='40' text-anchor='middle' dy='.3em' fill='white'%3EL%3C/text%3E%3C/svg%3E" alt="Logo">
+                </div>
+                <div class="input-group">
+                    <input type="text" placeholder="请输入账号" id="username">
+                </div>
+                <div class="input-group">
+                    <input type="password" placeholder="请输入密码" id="password">
+                </div>
+                <button class="login-btn" onclick="handleLogin()">登录</button>
+            </div>
+        </div>
+        <div class="design-specs">
+            <h2>设计说明</h2>
+            <div class="spec-item">
+                <h3>布局设计</h3>
+                <p>采用居中布局，Logo位于顶部，输入框和按钮垂直排列，确保视觉重心稳定。</p>
+            </div>
+            <div class="spec-item">
+                <h3>配色方案</h3>
+                <p>主色调使用#4A90E2（蓝色），给人可靠、专业的感觉。背景采用白色，突出内容。</p>
+            </div>
+            <div class="spec-item">
+                <h3>交互设计</h3>
+                <p>输入框获得焦点时有轻微阴影效果，按钮有hover状态，提供即时反馈。</p>
+            </div>
+            <div class="spec-item">
+                <h3>字体规范</h3>
+                <p>使用系统默认字体栈，确保在各平台显示一致。输入框和按钮文字大小16px。</p>
+            </div>
+            <div class="spec-item">
+                <h3>间距规范</h3>
+                <p>Logo与输入框间距40px，输入框之间间距20px，确保视觉呼吸感。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (!username || !password) {
+                alert('请输入账号和密码');
+                return;
+            }
+            alert('登录成功！');
+        }
+    </script>
+</body>
+</html> 
