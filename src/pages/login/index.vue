@@ -1,270 +1,175 @@
 <template>
   <view class="login-container">
-    <!-- 毛玻璃背景 -->
-    <view class="backdrop-blur"></view>
-    
-    <view class="login-form">
-      <view class="welcome">
-        <text class="title">欢迎回来</text>
-        <text class="subtitle">请登录您的账号</text>
+    <view class="login-box">
+      <view class="title">登录</view>
+      <view class="form">
+        <input
+          type="text"
+          v-model="username"
+          placeholder="请输入用户名"
+          class="input"
+        />
+        <input
+          type="password"
+          v-model="password"
+          placeholder="请输入密码"
+          class="input"
+        />
       </view>
-      
-      <!-- 表单区域 -->
-      <view class="input-group">
-        <text class="label">用户名</text>
-        <view class="input-wrapper">
-          <input 
-            type="text" 
-            v-model="formData.username" 
-            placeholder="请输入用户名" 
-            placeholder-class="placeholder"
-          />
-          <image class="icon" src="/static/user-icon.png" mode="aspectFit"></image>
-        </view>
-      </view>
-      
-      <view class="input-group">
-        <text class="label">密码</text>
-        <view class="input-wrapper">
-          <input 
-            :type="showPassword ? 'text' : 'password'" 
-            v-model="formData.password" 
-            placeholder="请输入密码" 
-            placeholder-class="placeholder"
-          />
-          <image 
-            class="icon clickable" 
-            :src="showPassword ? '/static/eye-open.png' : '/static/eye-close.png'"
-            @tap="togglePassword"
-            mode="aspectFit"
-          ></image>
-        </view>
-      </view>
-
-      <view class="options">
-        <label class="remember-me">
-          <checkbox v-model="rememberMe" color="#a5c0fe" />
-          <text>记住我</text>
-        </label>
-        <text class="forget-password" @tap="handleForgetPassword">忘记密码？</text>
-      </view>
-      
-      <button class="login-btn" hover-class="button-hover" @tap="handleLogin">登录</button>
-      
-      <view class="register-link">
-        <text>还没有账号？</text>
-        <text class="link" @tap="handleRegister">立即注册</text>
+      <view class="buttons">
+        <button class="login-btn" @tap="handleLogin" :disabled="loading">
+          {{ loading ? '登录中...' : '登录' }}
+        </button>
+        <button class="register-btn" @tap="handleRegister" :disabled="loading">
+          注册账号
+        </button>
       </view>
     </view>
   </view>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
 import { ref } from 'vue'
+import { useUserStore } from '@/store/user'
 
-// 表单数据
-const formData = ref({
-  username: '',
-  password: ''
-})
+export default {
+  setup() {
+    const userStore = useUserStore()
+    const username = ref('')
+    const password = ref('')
+    const loading = ref(false)
 
-// 控制密码显示
-const showPassword = ref(false)
-const rememberMe = ref(false)
-
-// 切换密码显示
-const togglePassword = () => {
-  showPassword.value = !showPassword.value
-}
-
-// 登录处理
-const handleLogin = () => {
-  if (!formData.value.username || !formData.value.password) {
-    uni.showToast({
-      title: '请输入账号和密码',
-      icon: 'none'
-    })
-    return
-  }
-  
-  uni.showToast({
-    title: '登录成功',
-    icon: 'success',
-    duration: 1500,
-    success: () => {
-      setTimeout(() => {
-        uni.reLaunch({
-          url: '/pages/index/index'
+    // 处理登录
+    const handleLogin = async () => {
+      if (!username.value.trim() || !password.value.trim()) {
+        uni.showToast({
+          title: '请输入用户名和密码',
+          icon: 'none'
         })
-      }, 1500)
+        return
+      }
+
+      loading.value = true
+      try {
+        const success = await userStore.login(username.value, password.value)
+        if (success) {
+          uni.showToast({
+            title: '登录成功',
+            icon: 'success'
+          })
+          // 等待 toast 显示完成后再跳转
+          setTimeout(() => {
+            uni.reLaunch({
+              url: '/pages/index/index'
+            })
+          }, 1500)
+        } else {
+          uni.showToast({
+            title: '登录失败，请检查用户名和密码',
+            icon: 'none'
+          })
+        }
+      } catch (error) {
+        uni.showToast({
+          title: '登录失败，请稍后重试',
+          icon: 'none'
+        })
+      } finally {
+        loading.value = false
+      }
     }
-  })
-}
 
-// 忘记密码
-const handleForgetPassword = () => {
-  uni.showToast({
-    title: '忘记密码功能开发中',
-    icon: 'none'
-  })
-}
+    // 处理注册
+    const handleRegister = () => {
+      uni.navigateTo({
+        url: '/pages/register/index'
+      })
+    }
 
-// 注册
-const handleRegister = () => {
-  uni.navigateTo({
-    url: '/pages/register/index'
-  })
+    return {
+      username,
+      password,
+      loading,
+      handleLogin,
+      handleRegister
+    }
+  }
 }
 </script>
 
-<style>
+<style lang="scss">
 .login-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #a5c0fe 0%, #c2a8fd 100%);
-  position: relative;
+  background-color: #f5f5f5;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   padding: 40rpx;
-}
 
-.backdrop-blur {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  backdrop-filter: blur(20px);
-  background: rgba(255, 255, 255, 0.3);
-}
+  .login-box {
+    width: 100%;
+    background-color: #fff;
+    border-radius: 20rpx;
+    padding: 40rpx;
+    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
 
-.login-form {
-  position: relative;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 32rpx;
-  padding: 60rpx 40rpx;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
-}
+    .title {
+      font-size: 40rpx;
+      font-weight: bold;
+      color: #333;
+      text-align: center;
+      margin-bottom: 40rpx;
+    }
 
-.welcome {
-  text-align: center;
-  margin-bottom: 60rpx;
-}
+    .form {
+      margin-bottom: 40rpx;
 
-.welcome .title {
-  font-size: 48rpx;
-  color: #333;
-  font-weight: 600;
-  margin-bottom: 16rpx;
-  display: block;
-}
+      .input {
+        width: 100%;
+        height: 88rpx;
+        background-color: #f5f5f5;
+        border-radius: 10rpx;
+        padding: 0 30rpx;
+        font-size: 28rpx;
+        margin-bottom: 20rpx;
 
-.welcome .subtitle {
-  font-size: 28rpx;
-  color: #666;
-  display: block;
-}
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
 
-.input-group {
-  margin-bottom: 40rpx;
-}
+    .buttons {
+      .login-btn {
+        width: 100%;
+        height: 88rpx;
+        line-height: 88rpx;
+        background-color: #007AFF;
+        color: #fff;
+        font-size: 32rpx;
+        border-radius: 10rpx;
+        margin-bottom: 20rpx;
 
-.input-group .label {
-  font-size: 28rpx;
-  color: #333;
-  margin-bottom: 16rpx;
-  display: block;
-}
+        &[disabled] {
+          opacity: 0.7;
+        }
+      }
 
-.input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
+      .register-btn {
+        width: 100%;
+        height: 88rpx;
+        line-height: 88rpx;
+        background-color: #fff;
+        color: #007AFF;
+        font-size: 32rpx;
+        border-radius: 10rpx;
+        border: 2rpx solid #007AFF;
 
-.input-wrapper input {
-  flex: 1;
-  height: 96rpx;
-  background: #f5f7fa;
-  border: 2rpx solid transparent;
-  border-radius: 16rpx;
-  padding: 0 88rpx 0 32rpx;
-  font-size: 32rpx;
-  color: #333;
-  transition: all 0.3s;
-}
-
-.input-wrapper input:focus {
-  border-color: #a5c0fe;
-  background: #fff;
-  box-shadow: 0 0 0 4rpx rgba(165, 192, 254, 0.2);
-}
-
-.input-wrapper .icon {
-  position: absolute;
-  right: 32rpx;
-  width: 40rpx;
-  height: 40rpx;
-}
-
-.input-wrapper .icon.clickable {
-  cursor: pointer;
-}
-
-.placeholder {
-  color: #999;
-}
-
-.options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 40rpx;
-}
-
-.remember-me {
-  display: flex;
-  align-items: center;
-  font-size: 28rpx;
-  color: #666;
-}
-
-.remember-me checkbox {
-  margin-right: 12rpx;
-  transform: scale(0.8);
-}
-
-.forget-password {
-  font-size: 28rpx;
-  color: #a5c0fe;
-}
-
-.login-btn {
-  width: 100%;
-  height: 96rpx;
-  background: linear-gradient(135deg, #a5c0fe 0%, #c2a8fd 100%);
-  border-radius: 16rpx;
-  color: #fff;
-  font-size: 32rpx;
-  font-weight: 600;
-  border: none;
-  margin-bottom: 40rpx;
-}
-
-.button-hover {
-  opacity: 0.9;
-  transform: translateY(2rpx);
-}
-
-.register-link {
-  text-align: center;
-  font-size: 28rpx;
-  color: #666;
-}
-
-.register-link .link {
-  color: #a5c0fe;
-  margin-left: 12rpx;
+        &[disabled] {
+          opacity: 0.7;
+        }
+      }
+    }
+  }
 }
 </style>

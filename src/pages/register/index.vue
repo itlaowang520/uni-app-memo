@@ -13,10 +13,10 @@
       <view class="input-group">
         <text class="label">用户名</text>
         <view class="input-wrapper">
-          <input 
-            type="text" 
+          <input
+            type="text"
             v-model="formData.username" 
-            placeholder="请输入用户名" 
+            placeholder="请输入用户名"
             placeholder-class="placeholder"
           />
           <image class="icon" src="/static/user-icon.png" mode="aspectFit"></image>
@@ -26,10 +26,10 @@
       <view class="input-group">
         <text class="label">密码</text>
         <view class="input-wrapper">
-          <input 
+          <input
             :type="showPassword ? 'text' : 'password'" 
             v-model="formData.password" 
-            placeholder="请输入密码" 
+            placeholder="请输入密码"
             placeholder-class="placeholder"
           />
           <image 
@@ -44,7 +44,7 @@
       <view class="input-group">
         <text class="label">确认密码</text>
         <view class="input-wrapper">
-          <input 
+          <input
             :type="showConfirmPassword ? 'text' : 'password'" 
             v-model="formData.confirmPassword" 
             placeholder="请再次输入密码" 
@@ -58,8 +58,28 @@
           ></image>
         </view>
       </view>
+
+      <view class="input-group">
+        <text class="label">邮箱</text>
+        <view class="input-wrapper">
+          <input
+            type="text"
+            v-model="formData.email" 
+            placeholder="请输入邮箱"
+            placeholder-class="placeholder"
+          />
+          <image class="icon" src="/static/email-icon.png" mode="aspectFit"></image>
+        </view>
+      </view>
       
-      <button class="register-btn" hover-class="button-hover" @tap="handleRegister">注册</button>
+      <button 
+        class="register-btn" 
+        hover-class="button-hover" 
+        @tap="handleRegister"
+        :disabled="loading"
+      >
+        {{ loading ? '注册中...' : '注册' }}
+      </button>
       
       <view class="login-link">
         <text>已有账号？</text>
@@ -71,17 +91,20 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useUserStore } from '@/store/user'
 
 // 表单数据
 const formData = ref({
   username: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
+  email: ''
 })
 
 // 控制密码显示
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
+const loading = ref(false)
 
 // 切换密码显示
 const togglePassword = () => {
@@ -93,8 +116,8 @@ const toggleConfirmPassword = () => {
 }
 
 // 注册处理
-const handleRegister = () => {
-  if (!formData.value.username || !formData.value.password || !formData.value.confirmPassword) {
+const handleRegister = async () => {
+  if (!formData.value.username || !formData.value.password || !formData.value.confirmPassword || !formData.value.email) {
     uni.showToast({
       title: '请填写完整信息',
       icon: 'none'
@@ -109,17 +132,51 @@ const handleRegister = () => {
     })
     return
   }
-  
-  uni.showToast({
-    title: '注册成功',
-    icon: 'success',
-    duration: 1500,
-    success: () => {
+
+  // 验证邮箱格式
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(formData.value.email)) {
+    uni.showToast({
+      title: '请输入正确的邮箱格式',
+      icon: 'none'
+    })
+    return
+  }
+
+  loading.value = true
+  try {
+    const userStore = useUserStore()
+    const success = await userStore.register(
+      formData.value.username,
+      formData.value.password,
+      formData.value.email
+    )
+
+    if (success) {
+      uni.showToast({
+        title: '注册成功',
+        icon: 'success'
+      })
+      // 等待 toast 显示完成后再跳转
       setTimeout(() => {
-        uni.navigateBack()
+        uni.reLaunch({
+          url: '/pages/index/index'
+        })
       }, 1500)
+    } else {
+      uni.showToast({
+        title: '注册失败，请稍后重试',
+        icon: 'none'
+      })
     }
-  })
+  } catch (error) {
+    uni.showToast({
+      title: '注册失败，请稍后重试',
+      icon: 'none'
+    })
+  } finally {
+    loading.value = false
+  }
 }
 
 // 返回登录页
